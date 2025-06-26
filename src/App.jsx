@@ -8,7 +8,7 @@ function App() {
 
   return (
     <>
-      <h1>Cognivox an AI tool</h1>
+      <h1 className='bg-cyan-600 text-5xl'>Cognivox an AI tool</h1>
     </>
   )
 }
