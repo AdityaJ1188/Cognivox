@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+
 
 function Home() {
   const navigate = useNavigate();
@@ -12,6 +14,9 @@ function Home() {
     <>
       {/* <h1 className="text-white text-4xl">Hello</h1>
       <button onClick={handleClick}>Go to Chat</button> */}
+      <Navbar />
+
+      {/* Hero Section */}
       <div className="flex h-screen justify-center items-center">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
           <div className="container px-4 md:px-6">
@@ -20,7 +25,7 @@ function Home() {
                 <img
                   src="/Cognivox_name-2.png"
                   alt="Study Smarter with AI"
-                  className="h-[4rem] sm:h-[5rem] md:h-[6rem] lg:h-[7rem]"
+                  className="h-[8rem] sm:h-[9rem] md:h-[10rem] lg:h-[12rem]"
                   style={{ boxShadow: "0 4px 12px rgba(255, 255, 255, 0.5)" }}
                 />
                 <p className="mx-auto max-w-[400px] text-white">
