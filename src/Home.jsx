@@ -2,43 +2,36 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
-
 function Home() {
   const navigate = useNavigate();
 
   const handleClick = () => {
     navigate("/chat");
   };
-
+  /* <h1 className="text-white text-4xl">Hello</h1>
+      <button onClick={handleClick}>Go to Chat</button> */
   return (
-    < div style={{
-          backgroundColor: "rgb(24, 24, 27)",
-          backgroundImage: "url('/background.png')",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-        }}>
-      {/* <h1 className="text-white text-4xl">Hello</h1>
-      <button onClick={handleClick}>Go to Chat</button> */}
+    <div className="min-h-screen bg-[url('/background.png')] bg-cover bg-no-repeat bg-center md:bg-fixed">
       <Navbar />
 
-      {/* Hero Section */}
-      <div
-        className="flex h-screen justify-center items-center"
-        
-      >
+      <div className="flex flex-col justify-center items-center h-screen space-y-6">
         <h1
           className="text-center text-white"
           style={{
             fontFamily: "'PT Sans', sans-serif",
             fontSize: "3.5rem",
             textShadow: `
-              0 0 10px rgba(255, 255, 255, 0.6),
-              0 0 20px rgba(255, 255, 255, 0.4)
-            `,
+          0 0 10px rgba(255, 255, 255, 0.6),
+          0 0 20px rgba(255, 255, 255, 0.4)
+        `,
           }}
         >
           Learn better. Faster. Smarter <br /> — with COGNIVOX
         </h1>
+
+        <button className="px-6 py-2 bg-white text-black rounded-full transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+          Try it now
+        </button>
       </div>
     </div>
   );
