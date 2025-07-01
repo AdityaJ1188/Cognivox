@@ -11,12 +11,12 @@ function Home() {
   /* <h1 className="text-white text-4xl">Hello</h1>
       <button onClick={handleClick}>Go to Chat</button> */
   return (
-    <div className="min-h-screen bg-[url('/background.png')] bg-cover bg-no-repeat bg-center md:bg-fixed">
+    <div className="h-screen bg-[url('/background.png')] bg-cover bg-no-repeat bg-center md:bg-fixed overflow-hidden">
       <Navbar />
 
-      <div className="flex flex-col justify-center items-center h-screen space-y-6">
+      <div className="flex flex-col justify-center items-center h-full space-y-6">
         <h1
-          className="text-center text-white"
+          className="text-center text-white font-bold"
           style={{
             fontFamily: "'PT Sans', sans-serif",
             fontSize: "3.5rem",
