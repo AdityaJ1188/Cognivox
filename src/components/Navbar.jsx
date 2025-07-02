@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,12 +13,17 @@ export default function Navbar() {
         setIsMobile(false);
       }
     }
+    
 
     handleResize(); // Call once on load
     window.addEventListener("resize", handleResize); // Re-run on resize
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  const navigate = useNavigate();
+    const signupcomp = () => {
+      navigate("/signup");
+    };
   return (
     <div
       className="container mx-auto flex justify-between items-center py-4 px-6 md:px-20 lg:px-32 bg-transparent relative z-50"
@@ -28,7 +34,7 @@ export default function Navbar() {
       {/* Show nav links only for non-mobile */}
       {!isMobile && (
         <ul className="hidden md:flex gap-12 text-white">
-          <a href="#Header" className="cursor-pointer hover:text-gray-400">
+          <a href="/" className="cursor-pointer hover:text-gray-400">
             Home
           </a>
           <a href="#About" className="cursor-pointer hover:text-gray-400">
@@ -42,10 +48,13 @@ export default function Navbar() {
 
       {!isMobile && (
         <div className="hidden md:flex gap-2">
-          <button className="px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition">
+          <button className="px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
             Log in
           </button>
-          <button className="px-6 py-2 bg-white text-black rounded-full">
+          <button
+            onClick={signupcomp}
+            className="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]"
+          >
             Sign up
           </button>
         </div>
@@ -63,7 +72,7 @@ export default function Navbar() {
 
           {menuOpen && (
             <div className="absolute top-20 right-6 bg-zinc-900 p-4 rounded-md shadow-md flex flex-col space-y-3 z-50">
-              <a href="#Header" className="text-white hover:text-gray-300">
+              <a href="/" className="text-white hover:text-gray-300">
                 Home
               </a>
               <a href="#About" className="text-white hover:text-gray-300">

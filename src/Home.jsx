@@ -8,6 +8,9 @@ function Home() {
   const handleClick = () => {
     navigate("/chat");
   };
+  const signup = () => {
+    navigate("/signup");
+  };
   /* <h1 className="text-white text-4xl">Hello</h1>
       <button onClick={handleClick}>Go to Chat</button> */
   return (
@@ -29,7 +32,7 @@ function Home() {
           Learn better. Faster. Smarter <br /> — with COGNIVOX
         </h1>
 
-        <button className="px-6 py-2 bg-white text-black rounded-full transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+        <button onClick={signup} className="px-6 py-2 bg-white text-black rounded-full transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
           Try it now
         </button>
       </div>
