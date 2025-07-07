@@ -39,7 +39,17 @@ export default function Signup() {
                   placeholder="Password"
                   type="password"
                   name="password"
-                  className="mt-2 flex h-10 w-full rounded-md border border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-base font-medium">Confirm Password</label>
+                <input
+                  placeholder="Confirm Password"
+                  type="password"
+                  name="Cpassword"
+                  className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
 

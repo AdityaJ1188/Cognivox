@@ -48,12 +48,12 @@ export default function Navbar() {
 
       {!isMobile && (
         <div className="hidden md:flex gap-2">
-          <button className="px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+          <button className="px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition  hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
             Log in
           </button>
           <button
             onClick={signupcomp}
-            className="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]"
+            className="px-6 py-2 bg-white text-black rounded-full hover:bg-white hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]"
           >
             Sign up
           </button>
