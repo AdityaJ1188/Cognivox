@@ -12,6 +12,7 @@ export default function Signup() {
             </h2>
             <p className="mt-2 text-base ">Already have an account? Sign In</p>
 
+
             <form className="mt-5 space-y-4">
               <div>
                 <label className="text-base font-medium">User Name</label>
