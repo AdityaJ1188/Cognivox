@@ -24,6 +24,9 @@ export default function Navbar() {
     const signupcomp = () => {
       navigate("/signup");
     };
+    const logincomp = () => {
+      navigate("/login");
+    }
   return (
     <div
       className="container mx-auto flex justify-between items-center py-4 px-6 md:px-20 lg:px-32 bg-transparent relative z-50"
@@ -48,7 +51,7 @@ export default function Navbar() {
 
       {!isMobile && (
         <div className="hidden md:flex gap-2">
-          <button className="px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition  hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
+          <button onClick={logincomp} className="px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition  hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">
             Log in
           </button>
           <button
