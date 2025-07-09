@@ -2,8 +2,7 @@ import Navbar from "./Navbar";
 
 export default function Login() {
   return (
-    <div className="bg-zinc-900 min-h-screen">
-      <Navbar />
+     <div className="bg-zinc-900 min-h-full">
       <div className="flex justify-center items-center min-h-[calc(100vh-80px)] px-4 py-10 text-white">
         <section className="w-full max-w-md bg-zinc-800 border border-zinc-700 rounded-xl shadow-lg p-6 sm:p-8">
           <div className="xl:mx-auto p-4 w-full">
