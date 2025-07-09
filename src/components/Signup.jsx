@@ -1,6 +1,13 @@
-import Navbar from "./Navbar";
+import { useRef } from "react";
+
 
 export default function Signup() {
+
+    const usernameRef = useRef()
+    const emailRef = useRef()
+    const passwordRef = useRef()
+    const passwordconfirmRef = useRef()
+
   return (
     <div className="bg-zinc-900 min-h-full">
       <div className="flex justify-center items-center min-h-[calc(100vh-80px)] px-4 py-10 text-white">
@@ -18,6 +25,7 @@ export default function Signup() {
                   placeholder="Full Name"
                   type="text"
                   name="username"
+                  ref={usernameRef}
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
@@ -28,6 +36,7 @@ export default function Signup() {
                   placeholder="Email"
                   type="email"
                   name="email"
+                  ref={emailRef}
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
@@ -38,6 +47,7 @@ export default function Signup() {
                   placeholder="Password"
                   type="password"
                   name="password"
+                  ref={passwordRef}
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
@@ -48,6 +58,7 @@ export default function Signup() {
                   placeholder="Confirm Password"
                   type="password"
                   name="Cpassword"
+                  ref={passwordconfirmRef}
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
