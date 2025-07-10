@@ -1,12 +1,37 @@
-import { useRef } from "react";
-
+import { useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Signup() {
+  const usernameRef = useRef();
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const passwordconfirmRef = useRef();
 
-    const usernameRef = useRef()
-    const emailRef = useRef()
-    const passwordRef = useRef()
-    const passwordconfirmRef = useRef()
+  const { signup } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault(); 
+
+    if (passwordRef.current.value !== passwordconfirmRef.current.value) {
+      toast.error("Passwords do not match ❌");
+      return;
+    }
+
+    try {
+      setError("");
+      setLoading(true);
+      await signup(emailRef.current.value, passwordRef.current.value);
+      toast.success("Account created successfully 🎉");
+    } catch {
+      toast.error("Failed to create an account ❌");
+    }
+
+    setLoading(false);
+  }
 
   return (
     <div className="bg-zinc-900 min-h-full">
@@ -16,9 +41,10 @@ export default function Signup() {
             <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
               Sign up to create account
             </h2>
+            
             <p className="mt-2 text-base">Already have an account? Sign In</p>
 
-            <form className="mt-5 space-y-4">
+            <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="text-base font-medium">User Name</label>
                 <input
@@ -53,7 +79,9 @@ export default function Signup() {
               </div>
 
               <div>
-                <label className="text-base font-medium">Confirm Password</label>
+                <label className="text-base font-medium">
+                  Confirm Password
+                </label>
                 <input
                   placeholder="Confirm Password"
                   type="password"
@@ -66,12 +94,13 @@ export default function Signup() {
               <div className="flex justify-center">
                 <button
                   type="submit"
+                  disabled={loading}
                   className="inline-flex items-center justify-center px-4 h-10 bg-white text-black border border-gray-300 rounded-full font-semibold  transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]"
                 >
                   Create Account
                 </button>
               </div>
-           </form>
+            </form>
           </div>
         </section>
       </div>
