@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const usernameRef = useRef();
@@ -12,6 +13,8 @@ export default function Signup() {
   const { signup } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault(); 
@@ -26,6 +29,7 @@ export default function Signup() {
       setLoading(true);
       await signup(emailRef.current.value, passwordRef.current.value);
       toast.success("Account created successfully 🎉");
+      navigate("/login");
     } catch {
       toast.error("Failed to create an account ❌");
     }
