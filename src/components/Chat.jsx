@@ -12,17 +12,16 @@ function Chat() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Push state to disable going back
+  const preventBack = () => {
     window.history.pushState(null, "", window.location.href);
+  };
 
-    const handlePopState = () => {
-      window.history.pushState(null, "", window.location.href);
-    };
+  window.history.pushState(null, "", window.location.href); // initial push
+  window.addEventListener("popstate", preventBack);
 
-    window.addEventListener("popstate", handlePopState);
+  return () => window.removeEventListener("popstate", preventBack);
+}, []);
 
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
 
   // const payload={ 
   //   "contents": [
