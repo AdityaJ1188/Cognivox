@@ -24,7 +24,7 @@ export default function Login() {
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
       toast.success("Sign in successfully 🎉");
-      navigate("/chat");
+      navigate("/chat", { replace: true });
     } catch {
       toast.error("Failed to Sign in ❌");
     }

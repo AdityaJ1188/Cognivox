@@ -1,12 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Chat.css";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import { useNavigate } from "react-router-dom";
 // import { URL } from './constants'
 
 function Chat() {
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState(undefined);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Push state to disable going back
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   // const payload={ 
   //   "contents": [
@@ -47,6 +63,7 @@ function Chat() {
 
     // console.log(response);
   };
+
 
   return (
     <div className="grid grid-cols-5 h-screen text-center">
