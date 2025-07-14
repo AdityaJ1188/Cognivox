@@ -10,11 +10,22 @@ function Chat() {
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState(undefined);
   const [error, setError] = useState("");
-  const currentUser = useAuth();
+  const { currentUser, logout } = useAuth();
 
   const navigate = useNavigate();
 
-    useEffect(() => {
+  function handleLogout()
+  {
+    setError('');
+    try{
+        logout();
+        navigate('/');
+
+    }catch{
+        setError('Failed to logout')
+    }
+  }
+  useEffect(() => {
     const preventBack = () => {
       window.history.pushState(null, "", window.location.href);
     };
@@ -86,9 +97,11 @@ function Chat() {
           {/* <div className='text-white'>
               {result}
             </div> */}
-          {/* <div className='text-white'>
+            <div className='text-white'>
               {currentUser.email}
-            </div> */}
+            </div>
+            <button onClick={handleLogout} className="px-6 py-2 bg-white text-black rounded-full hover:bg-white hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">Logout</button>
+
           <div
             className="text-white prose prose-p:my-2 prose-pre:my-3 prose-li:my-1 max-w-none dark:prose-invert parsed-markdown"
             dangerouslySetInnerHTML={{ __html: result }}
