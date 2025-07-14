@@ -3,27 +3,29 @@ import "./Chat.css";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 // import { URL } from './constants'
 
 function Chat() {
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState(undefined);
+  const [error, setError] = useState("");
+  const currentUser = useAuth();
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-  const preventBack = () => {
-    window.history.pushState(null, "", window.location.href);
-  };
+    useEffect(() => {
+    const preventBack = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
 
-  window.history.pushState(null, "", window.location.href); // initial push
-  window.addEventListener("popstate", preventBack);
+    window.history.pushState(null, "", window.location.href); // initial push
+    window.addEventListener("popstate", preventBack);
 
-  return () => window.removeEventListener("popstate", preventBack);
-}, []);
+    return () => window.removeEventListener("popstate", preventBack);
+  }, []);
 
-
-  // const payload={ 
+  // const payload={
   //   "contents": [
   //     {
   //       "parts": [
@@ -36,6 +38,7 @@ function Chat() {
   // }
 
   const askQuestion = async () => {
+    setResult("<p class='text-gray-400'>⌛ Waiting for response...</p>");
     const res = await fetch("http://localhost:5000/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,6 +47,18 @@ function Chat() {
     const data = await res.json();
     // console.log("Gemini says:", data.reply);
     //setResult(data.reply)
+    if (data.error) {
+      if (data.error.code === 503) {
+        setResult(
+          `<p class="text-yellow-400">⚠️ Gemini is currently overloaded. Please try again in a few moments.</p>`
+        );
+      } else {
+        setResult(
+          `<p class="text-red-400">❌ Error: ${data.error.message}</p>`
+        );
+      }
+      return;
+    }
     try {
       const rawHtml = marked.parse(data.reply);
       const safeHtml = DOMPurify.sanitize(rawHtml);
@@ -63,7 +78,6 @@ function Chat() {
     // console.log(response);
   };
 
-
   return (
     <div className="grid grid-cols-5 h-screen text-center">
       <div className="col-span-1 bg-zinc-800"></div>
@@ -71,6 +85,9 @@ function Chat() {
         <div className="container h-[28rem] overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent text-left">
           {/* <div className='text-white'>
               {result}
+            </div> */}
+          {/* <div className='text-white'>
+              {currentUser.email}
             </div> */}
           <div
             className="text-white prose prose-p:my-2 prose-pre:my-3 prose-li:my-1 max-w-none dark:prose-invert parsed-markdown"
