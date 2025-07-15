@@ -2,33 +2,32 @@ import { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link, useNavigate } from "react-router-dom";
 
-export default function Login() {
+export default function Resetpassword() {
   const emailRef = useRef();
-  const passwordRef = useRef();
+  
 
-  const { login } = useAuth();
+  const { resetpassword } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
+  const email = emailRef.current.value;
+  if (!email) return;
 
-    try {
-      setError("");
-      setLoading(true);
-      await login(emailRef.current.value, passwordRef.current.value);
-      toast.success("Sign in successfully 🎉");
-      navigate("/chat", { replace: true });
-    } catch {
-      toast.error("Failed to Sign in ❌");
-    }
-
-    setLoading(false);
+  try {
+    await resetpassword(email);
+    console.log("Reset email sent to:", email);
+    toast.success("Reset email sent!");
+  } catch (err) {
+    console.error("RESET ERROR:", err.code, err.message);
+    toast.error(err.message || "Reset failed");
   }
+}
+
 
   return (
     <div className="bg-zinc-900 min-h-full">
@@ -36,7 +35,7 @@ export default function Login() {
         <section className="w-full max-w-md bg-zinc-800 border border-zinc-700 rounded-xl shadow-lg p-6 sm:p-8">
           <div className="xl:mx-auto p-4 w-full">
             <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
-              Log In to Cognivox
+              Reset your password
             </h2>
             {/* <p className="mt-2 text-base ">Already have an account? Sign In</p> */}
 
@@ -52,32 +51,13 @@ export default function Login() {
                 />
               </div>
 
-              <div>
-                <label className="text-base font-medium">Password</label>
-                <input
-                  placeholder="Password"
-                  type="password"
-                  name="password"
-                  ref={passwordRef}
-                  className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                />
-              </div>
-              <div className="flex items-center justify-center text-white">
-                <Link
-                  to="/resetpassword"
-                  className=" underline hover:text-gray-300"
-                >
-                  Forgot Password ?
-                </Link>
-              </div>
-
               <div className="flex justify-center">
                 <button
                   type="submit"
                   disabled={loading}
                   className="inline-flex items-center justify-center px-4 h-10 bg-white text-black border border-gray-300 rounded-full font-semibold  transition hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]"
                 >
-                  Log in
+                  Reset Password
                 </button>
               </div>
             </form>
