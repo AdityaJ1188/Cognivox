@@ -66,7 +66,7 @@ export default function Login() {
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
-
+            
              
 
               <div className="flex justify-center">
