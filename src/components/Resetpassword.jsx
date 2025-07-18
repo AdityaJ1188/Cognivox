@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom"; 
+import Resetpasswordmodal from "./Resetpasswordmodal";
 
 export default function Resetpassword() {
   const emailRef = useRef();
@@ -65,32 +66,7 @@ export default function Resetpassword() {
       </div>
 
       
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-md relative">
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-black text-xl"
-              onClick={() => setShowModal(false)}
-            >
-              &times;
-            </button>
-
-            <h3 className="text-xl font-bold mb-4 text-center text-gray-800">
-              Check Your Email 📩
-            </h3>
-            <p className="text-gray-600 text-center mb-6">
-              We've sent a password reset link to your email.
-            </p>
-
-            <button
-              onClick={() => navigate("/login")}
-              className="block mx-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
-      )}
+      {showModal && <Resetpasswordmodal onClose={() => setShowModal(false)} />}
     </div>
   );
 }
