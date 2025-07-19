@@ -20,7 +20,7 @@ export default function Resetpassword() {
     try {
       setLoading(true);
       await resetpassword(email);
-      setShowModal(true);
+      toast.success("Password rset mail has been sent");
     } catch (err) {
       console.error("RESET ERROR:", err.code, err.message);
       toast.error(err.message || "Reset failed");
@@ -64,9 +64,6 @@ export default function Resetpassword() {
           </div>
         </section>
       </div>
-
-      
-      {showModal && <Resetpasswordmodal onClose={() => setShowModal(false)} />}
     </div>
   );
 }
