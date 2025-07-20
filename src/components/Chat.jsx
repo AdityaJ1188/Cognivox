@@ -14,15 +14,13 @@ function Chat() {
 
   const navigate = useNavigate();
 
-  function handleLogout()
-  {
-    setError('');
-    try{
-        logout();
-        navigate('/');
-
-    }catch{
-        setError('Failed to logout')
+  function handleLogout() {
+    setError("");
+    try {
+      logout();
+      navigate("/");
+    } catch {
+      setError("Failed to logout");
     }
   }
   useEffect(() => {
@@ -90,38 +88,49 @@ function Chat() {
   };
 
   return (
-    <div className="grid grid-cols-5 h-screen text-center">
+    <div className="grid grid-cols-5 h-screen text-center relative">
+      {/* Sidebar */}
       <div className="col-span-1 bg-zinc-800"></div>
-      <div className="col-span-4 p-10">
-        <div className="container h-[28rem] overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent text-left">
-          {/* <div className='text-white'>
-              {result}
-            </div> */}
-            <div className='text-white'>
-              {currentUser.email}
-            </div>
-            <button onClick={handleLogout} className="px-6 py-2 bg-white text-black rounded-full hover:bg-white hover:shadow-[0_0_12px_rgba(255,255,255,0.8)]">Logout</button>
 
+      {/* Main Chat Area */}
+      <div className="col-span-4 p-10 relative">
+        <div className="absolute top-6 left-10 right-10 flex justify-between items-center">
+          {/* Left side: Cognivox */}
+          <span className="text-white text-xl font-semibold">Cognivox</span>
+
+          {/* Right side: User info and Logout */}
+          <div className="flex items-center space-x-4">
+            <span className="text-white text-sm">{currentUser.email}</span>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-1.5 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 hover:shadow-[0_0_12px_rgba(255,255,255,0.8)] transition"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Chat Result Container */}
+        <div className="container h-[28rem] overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent text-left mt-12">
           <div
             className="text-white prose prose-p:my-2 prose-pre:my-3 prose-li:my-1 max-w-none dark:prose-invert parsed-markdown"
             dangerouslySetInnerHTML={{ __html: result }}
           />
         </div>
-        <div
-          className="bg-zinc-800 w-1/2 p-1 pr-5 text-white m-auto rounded-4xl
-          border border-zinc-700 flex h-16"
-        >
+
+        {/* Chat Input */}
+        <div className="bg-zinc-800 w-1/2 p-1 pr-5 text-white m-auto rounded-4xl border border-zinc-700 flex h-16 mt-8">
           <input
             type="text"
             value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && question.trim() !== "") {
-                event.preventDefault();
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && question.trim() !== "") {
+                e.preventDefault();
                 askQuestion();
               }
             }}
-            className="h-full w-full p-3 outline-none"
+            className="h-full w-full p-3 outline-none bg-transparent"
             placeholder="Ask me anything ?"
           />
           <button
@@ -139,8 +148,7 @@ function Chat() {
                 d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5z"
               />
             </svg>
-
-            <span className="text-white font-semibold pl-0.5 group-hover:opacity-0 transition-opacity duration-200 ">
+            <span className="text-white font-semibold pl-0.5 group-hover:opacity-0 transition-opacity duration-200">
               Ask
             </span>
           </button>
