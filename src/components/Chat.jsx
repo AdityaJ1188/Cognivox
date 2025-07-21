@@ -4,6 +4,9 @@ import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { ref, push, set, onValue, get } from "firebase/database";
+import { database } from "../components/firebase";
+import { v4 as uuidv4 } from "uuid";
 
 function Chat() {
   const [question, setQuestion] = useState("");
@@ -12,7 +15,10 @@ function Chat() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
+  const [chatId, setChatId] = useState("");
+  const [chatList, setChatList] = useState([]);
 
+  // Logout handler
   function handleLogout() {
     setError("");
     try {
@@ -23,6 +29,7 @@ function Chat() {
     }
   }
 
+  // Disable browser back navigation
   useEffect(() => {
     const preventBack = () => {
       window.history.pushState(null, "", window.location.href);
@@ -32,23 +39,101 @@ function Chat() {
     return () => window.removeEventListener("popstate", preventBack);
   }, []);
 
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Load user's chat list and create first chat if needed
+ useEffect(() => {
+  if (!currentUser) return;
+
+  const userChatsRef = ref(database, `users/${currentUser.uid}/chats`);
+
+  get(userChatsRef).then((snapshot) => {
+    const data = snapshot.val();
+    let chatArray = [];
+
+    if (data) {
+      chatArray = Object.entries(data).map(([id, val]) => ({
+        id,
+        title: val.title || "Untitled",
+      }));
+    }
+
+    const nextChatNumber = chatArray.length + 1;
+    const newChatTitle = `Chat ${nextChatNumber}`;
+    const newChatId = uuidv4();
+
+    const chatRef = ref(database, `users/${currentUser.uid}/chats/${newChatId}`);
+    set(chatRef, { title: newChatTitle, messages: [] }).then(() => {
+      const updatedChatList = [...chatArray, { id: newChatId, title: newChatTitle }];
+      setChatList(updatedChatList);
+      setChatId(newChatId);
+      setMessages([]);
+    });
+  });
+}, [currentUser]);
+
+
+
+
+  // Load messages from Firebase for selected chat
+  const loadMessages = async (selectedChatId) => {
+    if (!currentUser) return;
+
+    const messagesRef = ref(
+      database,
+      `users/${currentUser.uid}/chats/${selectedChatId}/messages`
+    );
+    const snapshot = await get(messagesRef);
+    const data = snapshot.val();
+    if (data) {
+      const msgArray = Object.values(data);
+      setMessages(msgArray);
+    } else {
+      setMessages([]);
+    }
+  };
+
+
+  // Create a new chat
+  const createNewChat = () => {
+   if (!currentUser) return;
+
+  const nextChatNumber = chatList.length + 1;
+  const newChatTitle = `Chat ${nextChatNumber}`;
+  const newChatId = uuidv4();
+
+  const chatRef = ref(database, `users/${currentUser.uid}/chats/${newChatId}`);
+  set(chatRef, { title: newChatTitle, messages: [] }).then(() => {
+    const updatedChatList = [...chatList, { id: newChatId, title: newChatTitle }];
+    setChatList(updatedChatList);
+    setChatId(newChatId);
+    setMessages([]);
+  });
+  };
+
+  // Handle chat click from sidebar
+  const handleChatClick = (id) => {
+    setChatId(id);
+    loadMessages(id);
+  };
+
+  // Ask question and save messages
   const askQuestion = async () => {
-    if (!question.trim()) return;
+    if (!question.trim() || !chatId) return;
 
     const userMsg = { type: "question", text: question };
-    setMessages((prev) => [...prev, userMsg]);
-    setQuestion("");
-
     const loadingMsg = {
       type: "answer",
       text: "<p class='text-gray-400'>⌛ Waiting for response...</p>",
       loading: true,
     };
-    setMessages((prev) => [...prev, loadingMsg]);
+
+    const updatedMsgs = [...messages, userMsg, loadingMsg];
+    setMessages(updatedMsgs);
+    setQuestion("");
 
     try {
       const res = await fetch("http://localhost:5000/api/chat", {
@@ -58,46 +143,69 @@ function Chat() {
       });
 
       const data = await res.json();
-      setMessages((prev) => prev.filter((msg) => !msg.loading));
+      const filteredMsgs = updatedMsgs.filter((msg) => !msg.loading);
 
+      let answerMsg;
       if (data.error) {
-        const errorMsg =
+        const errorText =
           data.error.code === 503
-            ? `<p class="text-yellow-400">⚠️ Gemini is currently overloaded. Please try again later.</p>`
+            ? `<p class="text-yellow-400">⚠️ Gemini is overloaded. Try later.</p>`
             : `<p class="text-red-400">❌ Error: ${data.error.message}</p>`;
-        setMessages((prev) => [...prev, { type: "answer", text: errorMsg }]);
+        answerMsg = { type: "answer", text: errorText };
       } else {
         const rawHtml = marked.parse(data.reply);
         const safeHtml = DOMPurify.sanitize(rawHtml);
-        setMessages((prev) => [...prev, { type: "answer", text: safeHtml }]);
+        answerMsg = { type: "answer", text: safeHtml };
       }
+
+      const finalMsgs = [...filteredMsgs, answerMsg];
+      setMessages(finalMsgs);
+
+      // Save both Q & A to Firebase
+      const msgsRef = ref(
+        database,
+        `users/${currentUser.uid}/chats/${chatId}/messages`
+      );
+      await set(msgsRef, finalMsgs);
     } catch (err) {
-      setMessages((prev) => prev.filter((msg) => !msg.loading));
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "answer",
-          text: `<p class='text-red-400'>❌ Network error.</p>`,
-        },
-      ]);
+      const filteredMsgs = messages.filter((msg) => !msg.loading);
+      const errorMsg = {
+        type: "answer",
+        text: `<p class='text-red-400'>❌ Network error.</p>`,
+      };
+      setMessages([...filteredMsgs, errorMsg]);
     }
   };
 
   return (
     <div className="grid grid-cols-5 h-screen text-white">
-      {/* Sidebar - History */}
+      {/* Sidebar */}
       <div className="col-span-1 bg-zinc-800 border-r border-zinc-700 p-4 flex flex-col">
         <h2 className="text-lg font-bold mb-4">Cognivox</h2>
+
         <div className="flex-1 space-y-3 overflow-auto text-left">
-          <div className="bg-zinc-700 rounded-lg p-2">Chat 1</div>
-          <div className="bg-zinc-700 rounded-lg p-2">Chat 2</div>
+          {chatList.map((chat) => (
+            <div
+              key={chat.id}
+              onClick={() => handleChatClick(chat.id)}
+              className={`bg-zinc-700 rounded-lg p-2 cursor-pointer hover:bg-zinc-600 ${
+                chat.id === chatId ? "bg-zinc-600" : ""
+              }`}
+            >
+              {chat.title}
+            </div>
+          ))}
         </div>
-        <button className="mt-4 bg-white text-black py-2 rounded-lg font-semibold hover:bg-gray-200 transition">
+
+        <button
+          onClick={createNewChat}
+          className="mt-4 bg-white text-black py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+        >
           + New Chat
         </button>
       </div>
 
-      {/* Main Chat */}
+      {/* Main Chat Area */}
       <div className="col-span-4 flex flex-col h-screen bg-zinc-900">
         {/* Header */}
         <div className="px-10 py-6 flex justify-between items-center border-b border-zinc-700">
@@ -113,8 +221,8 @@ function Chat() {
           </div>
         </div>
 
+        {/* Messages */}
         <div className="relative flex-1 flex flex-col overflow-hidden">
-          {/* Messages container */}
           <div className="flex-1 overflow-y-auto px-10 py-6 pb-28 space-y-4">
             {messages.map((msg, index) => (
               <div
@@ -126,8 +234,8 @@ function Chat() {
                 <div
                   className={`px-4 py-2 rounded-xl break-words inline-block ${
                     msg.type === "question"
-                      ? "bg-zinc-600 text-right text-white"
-                      : "bg-zinc-700 text-left text-white"
+                      ? "bg-zinc-600 text-white"
+                      : "bg-zinc-700 text-white"
                   }`}
                   style={{ maxWidth: "75%", wordWrap: "break-word" }}
                   dangerouslySetInnerHTML={{ __html: msg.text }}
@@ -137,7 +245,7 @@ function Chat() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input box slightly above bottom */}
+          {/* Input */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-3/4 bg-transparent">
             <div className="flex items-center bg-zinc-800/70 backdrop-blur-md rounded-full px-4 h-16 border border-zinc-700">
               <input
@@ -146,7 +254,7 @@ function Chat() {
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && askQuestion()}
                 className="h-full w-full p-3 outline-none bg-transparent"
-                placeholder="Ask me anything ?"
+                placeholder="Ask me anything?"
               />
               <button
                 onClick={askQuestion}
