@@ -4,7 +4,7 @@ import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ref, push, set, onValue, get } from "firebase/database";
+import { ref, push, set, onValue, get, off } from "firebase/database";
 import { database } from "../components/firebase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,7 +18,7 @@ function Chat() {
   const [chatId, setChatId] = useState("");
   const [chatList, setChatList] = useState([]);
 
-  // Logout handler
+  // Logout
   function handleLogout() {
     setError("");
     try {
@@ -29,40 +29,43 @@ function Chat() {
     }
   }
 
-  // Disable browser back navigation
-  useEffect(() => {
-    const preventBack = () => {
-      window.history.pushState(null, "", window.location.href);
-    };
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", preventBack);
-    return () => window.removeEventListener("popstate", preventBack);
-  }, []);
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+const didCreateNewChat = useRef(false); // ✅ flag to prevent multiple runs
 
-  // Load user's chat list and create first chat if needed
-  const [hasCreatedChat, setHasCreatedChat] = useState(false);
+useEffect(() => {
+  if (!currentUser || didCreateNewChat.current) return;
 
-  useEffect(() => {
-    if (!currentUser || hasCreatedChat) return;
+  const userChatsRef = ref(database, `users/${currentUser.uid}/chats`);
 
-    const userChatsRef = ref(database, `users/${currentUser.uid}/chats`);
-    get(userChatsRef).then((snapshot) => {
-      const data = snapshot.val();
-      let chatArray = [];
+  const unsubscribe = onValue(userChatsRef, async (snapshot) => {
+    const data = snapshot.val();
+    let chatArray = [];
 
-      if (data) {
-        chatArray = Object.entries(data).map(([id, val]) => ({
-          id,
-          title: val.title || "Untitled",
-        }));
-      }
+    if (data) {
+      chatArray = Object.entries(data).map(([id, val]) => ({
+        id,
+        title: val.title || "Untitled",
+      }));
+    }
 
-      const nextChatNumber = chatArray.length + 1;
+    setChatList(chatArray);
+
+    // ✅ Only run ONCE per login
+    if (!didCreateNewChat.current) {
+      didCreateNewChat.current = true;
+
+      // Get next chat number
+      const existingTitles = chatArray
+        .map((chat) => chat.title)
+        .filter((title) => /^Chat \d+$/.test(title));
+
+      const usedNumbers = existingTitles.map((title) =>
+        parseInt(title.replace("Chat ", ""), 10)
+      );
+      const nextChatNumber = usedNumbers.length
+        ? Math.max(...usedNumbers) + 1
+        : 1;
+
       const newChatTitle = `Chat ${nextChatNumber}`;
       const newChatId = uuidv4();
 
@@ -70,23 +73,24 @@ function Chat() {
         database,
         `users/${currentUser.uid}/chats/${newChatId}`
       );
-      set(chatRef, { title: newChatTitle, messages: [] }).then(() => {
-        const updatedChatList = [
-          ...chatArray,
-          { id: newChatId, title: newChatTitle },
-        ];
-        setChatList(updatedChatList);
-        setChatId(newChatId);
-        setMessages([]);
-        setHasCreatedChat(true); // ✅ prevents infinite chat creation
-      });
-    });
-  }, [currentUser, hasCreatedChat]);
+      await set(chatRef, { title: newChatTitle, messages: [] });
 
-  // Load messages from Firebase for selected chat
+      const updatedChatList = [...chatArray, { id: newChatId, title: newChatTitle }];
+      setChatList(updatedChatList);
+      setChatId(newChatId);
+      setMessages([]);
+    }
+  });
+
+  return () => off(userChatsRef);
+}, [currentUser]);
+
+
+
+
+  // Load messages
   const loadMessages = async (selectedChatId) => {
     if (!currentUser) return;
-
     const messagesRef = ref(
       database,
       `users/${currentUser.uid}/chats/${selectedChatId}/messages`
@@ -101,16 +105,29 @@ function Chat() {
     }
   };
 
-  // Create a new chat
+  // Create new chat (correct chat numbering)
   const createNewChat = async () => {
     if (!currentUser) return;
 
     const userChatsRef = ref(database, `users/${currentUser.uid}/chats`);
     const snapshot = await get(userChatsRef);
     const data = snapshot.val();
-    const chatCount = data ? Object.keys(data).length : 0;
 
-    const nextChatNumber = chatCount + 1;
+    let existingTitles = [];
+
+    if (data) {
+      existingTitles = Object.values(data)
+        .map((chat) => chat.title)
+        .filter((title) => /^Chat \d+$/.test(title));
+    }
+
+    const usedNumbers = existingTitles.map((title) =>
+      parseInt(title.replace("Chat ", ""), 10)
+    );
+    const nextChatNumber = usedNumbers.length
+      ? Math.max(...usedNumbers) + 1
+      : 1;
+
     const newChatTitle = `Chat ${nextChatNumber}`;
     const newChatId = uuidv4();
 
@@ -120,22 +137,19 @@ function Chat() {
     );
     await set(chatRef, { title: newChatTitle, messages: [] });
 
-    const updatedChatList = [
-      ...chatList,
-      { id: newChatId, title: newChatTitle },
-    ];
+    const updatedChatList = [...chatList, { id: newChatId, title: newChatTitle }];
     setChatList(updatedChatList);
     setChatId(newChatId);
     setMessages([]);
   };
 
-  // Handle chat click from sidebar
+  // On click chat
   const handleChatClick = (id) => {
     setChatId(id);
     loadMessages(id);
   };
 
-  // Ask question and save messages
+  // Ask question
   const askQuestion = async () => {
     if (!question.trim() || !chatId) return;
 
@@ -176,7 +190,6 @@ function Chat() {
       const finalMsgs = [...filteredMsgs, answerMsg];
       setMessages(finalMsgs);
 
-      // Save both Q & A to Firebase
       const msgsRef = ref(
         database,
         `users/${currentUser.uid}/chats/${chatId}/messages`
