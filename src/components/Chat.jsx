@@ -4,7 +4,16 @@ import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ref, push, set, onValue, get, off } from "firebase/database";
+import {
+  ref,
+  push,
+  set,
+  onValue,
+  get,
+  update,
+  remove,
+  off,
+} from "firebase/database";
 import { database } from "../components/firebase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,7 +27,6 @@ function Chat() {
   const [chatId, setChatId] = useState("");
   const [chatList, setChatList] = useState([]);
 
-  // Logout
   function handleLogout() {
     setError("");
     try {
@@ -29,66 +37,62 @@ function Chat() {
     }
   }
 
+  const didCreateNewChat = useRef(false);
 
-const didCreateNewChat = useRef(false); // ✅ flag to prevent multiple runs
+  useEffect(() => {
+    if (!currentUser || didCreateNewChat.current) return;
 
-useEffect(() => {
-  if (!currentUser || didCreateNewChat.current) return;
+    const userChatsRef = ref(database, `users/${currentUser.uid}/chats`);
 
-  const userChatsRef = ref(database, `users/${currentUser.uid}/chats`);
+    const unsubscribe = onValue(userChatsRef, async (snapshot) => {
+      const data = snapshot.val();
+      let chatArray = [];
 
-  const unsubscribe = onValue(userChatsRef, async (snapshot) => {
-    const data = snapshot.val();
-    let chatArray = [];
+      if (data) {
+        chatArray = Object.entries(data).map(([id, val]) => ({
+          id,
+          title: val.title || "Untitled",
+        }));
+      }
 
-    if (data) {
-      chatArray = Object.entries(data).map(([id, val]) => ({
-        id,
-        title: val.title || "Untitled",
-      }));
-    }
+      setChatList(chatArray);
 
-    setChatList(chatArray);
+      if (!didCreateNewChat.current) {
+        didCreateNewChat.current = true;
 
-    // ✅ Only run ONCE per login
-    if (!didCreateNewChat.current) {
-      didCreateNewChat.current = true;
+        const existingTitles = chatArray
+          .map((chat) => chat.title)
+          .filter((title) => /^Chat \d+$/.test(title));
 
-      // Get next chat number
-      const existingTitles = chatArray
-        .map((chat) => chat.title)
-        .filter((title) => /^Chat \d+$/.test(title));
+        const usedNumbers = existingTitles.map((title) =>
+          parseInt(title.replace("Chat ", ""), 10)
+        );
+        const nextChatNumber = usedNumbers.length
+          ? Math.max(...usedNumbers) + 1
+          : 1;
 
-      const usedNumbers = existingTitles.map((title) =>
-        parseInt(title.replace("Chat ", ""), 10)
-      );
-      const nextChatNumber = usedNumbers.length
-        ? Math.max(...usedNumbers) + 1
-        : 1;
+        const newChatTitle = `Chat ${nextChatNumber}`;
+        const newChatId = uuidv4();
 
-      const newChatTitle = `Chat ${nextChatNumber}`;
-      const newChatId = uuidv4();
+        const chatRef = ref(
+          database,
+          `users/${currentUser.uid}/chats/${newChatId}`
+        );
+        await set(chatRef, { title: newChatTitle, messages: [] });
 
-      const chatRef = ref(
-        database,
-        `users/${currentUser.uid}/chats/${newChatId}`
-      );
-      await set(chatRef, { title: newChatTitle, messages: [] });
+        const updatedChatList = [
+          ...chatArray,
+          { id: newChatId, title: newChatTitle },
+        ];
+        setChatList(updatedChatList);
+        setChatId(newChatId);
+        setMessages([]);
+      }
+    });
 
-      const updatedChatList = [...chatArray, { id: newChatId, title: newChatTitle }];
-      setChatList(updatedChatList);
-      setChatId(newChatId);
-      setMessages([]);
-    }
-  });
+    return () => off(userChatsRef);
+  }, [currentUser]);
 
-  return () => off(userChatsRef);
-}, [currentUser]);
-
-
-
-
-  // Load messages
   const loadMessages = async (selectedChatId) => {
     if (!currentUser) return;
     const messagesRef = ref(
@@ -105,7 +109,6 @@ useEffect(() => {
     }
   };
 
-  // Create new chat (correct chat numbering)
   const createNewChat = async () => {
     if (!currentUser) return;
 
@@ -137,19 +140,49 @@ useEffect(() => {
     );
     await set(chatRef, { title: newChatTitle, messages: [] });
 
-    const updatedChatList = [...chatList, { id: newChatId, title: newChatTitle }];
+    const updatedChatList = [
+      ...chatList,
+      { id: newChatId, title: newChatTitle },
+    ];
     setChatList(updatedChatList);
     setChatId(newChatId);
     setMessages([]);
   };
 
-  // On click chat
   const handleChatClick = (id) => {
     setChatId(id);
     loadMessages(id);
   };
 
-  // Ask question
+  const renameChat = async (id, oldTitle) => {
+    const newTitle = prompt("Enter new title:", oldTitle);
+    if (!newTitle || !newTitle.trim()) return;
+
+    const chatRef = ref(database, `users/${currentUser.uid}/chats/${id}`);
+    await update(chatRef, { title: newTitle.trim() });
+
+    const updated = chatList.map((chat) =>
+      chat.id === id ? { ...chat, title: newTitle.trim() } : chat
+    );
+    setChatList(updated);
+  };
+
+  const deleteChat = async (id) => {
+    const confirmDelete = window.confirm("Delete this chat?");
+    if (!confirmDelete) return;
+
+    const chatRef = ref(database, `users/${currentUser.uid}/chats/${id}`);
+    await remove(chatRef);
+
+    const updated = chatList.filter((chat) => chat.id !== id);
+    setChatList(updated);
+
+    if (chatId === id) {
+      setChatId("");
+      setMessages([]);
+    }
+  };
+
   const askQuestion = async () => {
     if (!question.trim() || !chatId) return;
 
@@ -207,7 +240,6 @@ useEffect(() => {
 
   return (
     <div className="grid grid-cols-5 h-screen text-white">
-      {/* Sidebar */}
       <div className="col-span-1 bg-zinc-800 border-r border-zinc-700 p-4 flex flex-col">
         <h2 className="text-lg font-bold mb-4">Cognivox</h2>
 
@@ -215,27 +247,85 @@ useEffect(() => {
           {chatList.map((chat) => (
             <div
               key={chat.id}
-              onClick={() => handleChatClick(chat.id)}
               className={`bg-zinc-700 rounded-lg p-2 cursor-pointer hover:bg-zinc-600 ${
                 chat.id === chatId ? "bg-zinc-600" : ""
               }`}
             >
-              {chat.title}
+              <div className="flex justify-between items-center">
+                <div
+                  onClick={() => handleChatClick(chat.id)}
+                  className="truncate w-full cursor-pointer"
+                >
+                  {chat.title}
+                </div>
+                <div className="flex space-x-2 ml-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      renameChat(chat.id, chat.title);
+                    }}
+                    className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
+                  >
+                    {/* ✏️ Rename Icon */}
+                    <svg
+                      width="17"
+                      height="17"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C18.9113 1.47862 21.0686 2.47256 21.2799 4.09382C21.4912 5.71508 19.8362 6.61172 19.8362 6.61172L21.2799 6.40005Z" />
+                      <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteChat(chat.id);
+                    }}
+                    className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
+                  >
+                    {/* 🗑️ Delete Icon */}
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M10 11V17" />
+                      <path d="M14 11V17" />
+                      <path d="M4 7H20" />
+                      <path d="M6 7H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V7Z" />
+                      <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
 
         <button
           onClick={createNewChat}
-          className="mt-4 bg-white text-black py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+          className="mt-4 bg-white text-black py-2 rounded-full font-semibold hover:bg-gray-200 transition"
         >
           + New Chat
         </button>
       </div>
 
-      {/* Main Chat Area */}
       <div className="col-span-4 flex flex-col h-screen bg-zinc-900">
-        {/* Header */}
         <div className="px-10 py-6 flex justify-between items-center border-b border-zinc-700">
           <span className="text-xl font-semibold">Cognivox</span>
           <div className="flex items-center space-x-4">
@@ -249,7 +339,6 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Messages */}
         <div className="relative flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto px-10 py-6 pb-28 space-y-4">
             {messages.map((msg, index) => (
@@ -273,7 +362,6 @@ useEffect(() => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-3/4 bg-transparent">
             <div className="flex items-center bg-zinc-800/70 backdrop-blur-md rounded-full px-4 h-16 border border-zinc-700">
               <input
