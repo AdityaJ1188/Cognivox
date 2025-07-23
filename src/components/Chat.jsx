@@ -28,7 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-
 import { database } from "../components/firebase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -43,13 +42,11 @@ function Chat() {
   const [chatList, setChatList] = useState([]);
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-const [renameChatId, setRenameChatId] = useState(null);
-const [renameTitle, setRenameTitle] = useState("");
+  const [renameChatId, setRenameChatId] = useState(null);
+  const [renameTitle, setRenameTitle] = useState("");
 
-const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-const [chatToDeleteId, setChatToDeleteId] = useState(null);
-
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [chatToDeleteId, setChatToDeleteId] = useState(null);
 
   function handleLogout() {
     setError("");
@@ -284,12 +281,12 @@ const [chatToDeleteId, setChatToDeleteId] = useState(null);
                 </div>
                 <div className="flex space-x-2 ml-2">
                   <button
-                     onClick={(e) => {
-    e.stopPropagation();
-    setRenameChatId(chat.id);
-    setRenameTitle(chat.title);
-    setRenameDialogOpen(true);
-  }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRenameChatId(chat.id);
+                      setRenameTitle(chat.title);
+                      setRenameDialogOpen(true);
+                    }}
                     className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
                   >
                     {/* ✏️ Rename Icon */}
@@ -312,10 +309,10 @@ const [chatToDeleteId, setChatToDeleteId] = useState(null);
 
                   <button
                     onClick={(e) => {
-    e.stopPropagation();
-    setChatToDeleteId(chat.id);
-    setDeleteDialogOpen(true);
-  }}
+                      e.stopPropagation();
+                      setChatToDeleteId(chat.id);
+                      setDeleteDialogOpen(true);
+                    }}
                     className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
                   >
                     {/* 🗑️ Delete Icon */}
@@ -422,116 +419,122 @@ const [chatToDeleteId, setChatToDeleteId] = useState(null);
           </div>
         </div>
       </div>
-     <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-  {/* Blurred dark overlay */}
-  
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        {/* Blurred dark overlay */}
 
-  <DialogContent className="z-50 w-full max-w-sm bg-zinc-800 border border-zinc-700 rounded-xl shadow-lg p-5 sm:p-7 min-h-[230px] flex flex-col items-center justify-center">
-    <DialogHeader className="text-center">
-      <DialogTitle className="text-xl font-bold text-white">
-        Rename Chat
-      </DialogTitle>
-      <DialogDescription className="text-gray-300 mt-2 text-sm">
-        Enter a new title for your chat
-      </DialogDescription>
-    </DialogHeader>
+        <DialogContent className="z-50 w-full max-w-sm bg-zinc-800 border border-zinc-700 rounded-xl shadow-lg p-5 sm:p-7 min-h-[230px] flex flex-col items-center justify-center">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-xl font-bold text-white">
+              Rename Chat
+            </DialogTitle>
+            <DialogDescription className="text-gray-300 mt-2 text-sm">
+              Enter a new title for your chat
+            </DialogDescription>
+          </DialogHeader>
 
-    <div className="w-full mt-4 space-y-2">
-      <Label htmlFor="new-title" className="text-white">New Title</Label>
-      <Input
-        id="new-title"
-        value={renameTitle}
-        onChange={(e) => setRenameTitle(e.target.value)}
-        className="w-full bg-zinc-700 text-white placeholder-gray-400 border border-zinc-600 rounded-md px-3 py-2 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-zinc-500 focus:shadow-none"
-        placeholder="Enter new title"
-      />
+          <div className="w-full mt-4 space-y-2">
+            <Label htmlFor="new-title" className="text-white">
+              New Title
+            </Label>
+            <Input
+              id="new-title"
+              value={renameTitle}
+              onChange={(e) => setRenameTitle(e.target.value)}
+              className="w-full bg-zinc-700 text-white placeholder-gray-400 border border-zinc-600 rounded-md px-3 py-2 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-zinc-500 focus:shadow-none"
+              placeholder="Enter new title"
+            />
+          </div>
+
+          <DialogFooter className="mt-6 flex justify-center gap-3 w-full">
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="inline-flex items-center justify-center px-5 py-2 border border-gray-500 text-gray-200 rounded-full font-semibold transition hover:bg-zinc-700"
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+
+            <Button
+              onClick={async () => {
+                if (!renameTitle.trim() || !renameChatId) return;
+                const chatRef = ref(
+                  database,
+                  `users/${currentUser.uid}/chats/${renameChatId}`
+                );
+                await update(chatRef, { title: renameTitle.trim() });
+
+                const updated = chatList.map((chat) =>
+                  chat.id === renameChatId
+                    ? { ...chat, title: renameTitle.trim() }
+                    : chat
+                );
+                setChatList(updated);
+                setRenameDialogOpen(false);
+              }}
+              className="inline-flex items-center justify-center px-5 py-2 bg-white text-black border border-gray-300 rounded-full font-semibold transition hover:bg-gray-200"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="z-50 w-full max-w-sm bg-zinc-800 border border-zinc-700 rounded-xl shadow-lg p-5 sm:p-7 min-h-[200px] flex flex-col items-center justify-center">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-xl font-bold text-white">
+              Delete Chat
+            </DialogTitle>
+            <DialogDescription className="text-gray-300 mt-2 text-sm">
+              Are you sure you want to delete this chat? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex justify-center gap-3 w-full">
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="inline-flex items-center justify-center px-5 py-2 border border-gray-500 text-gray-200 rounded-full font-semibold transition hover:bg-zinc-700"
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+
+            <Button
+              onClick={async () => {
+                if (!chatToDeleteId) return;
+
+                const chatRef = ref(
+                  database,
+                  `users/${currentUser.uid}/chats/${chatToDeleteId}`
+                );
+                await remove(chatRef);
+
+                const updated = chatList.filter(
+                  (chat) => chat.id !== chatToDeleteId
+                );
+                setChatList(updated);
+
+                if (chatId === chatToDeleteId) {
+                  setChatId("");
+                  setMessages([]);
+                }
+
+                setDeleteDialogOpen(false);
+                setChatToDeleteId(null);
+              }}
+              className="inline-flex items-center justify-center px-5 py-2 bg-red-600 text-white border border-red-500 rounded-full font-semibold transition hover:bg-red-700"
+            >
+              Yes, Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-
-    <DialogFooter className="mt-6 flex justify-center gap-3 w-full">
-      <DialogClose asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="inline-flex items-center justify-center px-5 py-2 border border-gray-500 text-gray-200 rounded-full font-semibold transition hover:bg-zinc-700"
-        >
-          Cancel
-        </Button>
-      </DialogClose>
-
-      <Button
-        onClick={async () => {
-          if (!renameTitle.trim() || !renameChatId) return;
-          const chatRef = ref(database, `users/${currentUser.uid}/chats/${renameChatId}`);
-          await update(chatRef, { title: renameTitle.trim() });
-
-          const updated = chatList.map((chat) =>
-            chat.id === renameChatId ? { ...chat, title: renameTitle.trim() } : chat
-          );
-          setChatList(updated);
-          setRenameDialogOpen(false);
-        }}
-        className="inline-flex items-center justify-center px-5 py-2 bg-white text-black border border-gray-300 rounded-full font-semibold transition hover:bg-gray-200"
-      >
-        Save Changes
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
-<Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-  <DialogContent className="z-50 w-full max-w-sm bg-zinc-800 border border-zinc-700 rounded-xl shadow-lg p-5 sm:p-7 min-h-[200px] flex flex-col items-center justify-center">
-    <DialogHeader className="text-center">
-      <DialogTitle className="text-xl font-bold text-white">
-        Delete Chat
-      </DialogTitle>
-      <DialogDescription className="text-gray-300 mt-2 text-sm">
-        Are you sure you want to delete this chat? This action cannot be undone.
-      </DialogDescription>
-    </DialogHeader>
-
-    <DialogFooter className="mt-6 flex justify-center gap-3 w-full">
-      <DialogClose asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="inline-flex items-center justify-center px-5 py-2 border border-gray-500 text-gray-200 rounded-full font-semibold transition hover:bg-zinc-700"
-        >
-          Cancel
-        </Button>
-      </DialogClose>
-
-      <Button
-        onClick={async () => {
-          if (!chatToDeleteId) return;
-
-          const chatRef = ref(database, `users/${currentUser.uid}/chats/${chatToDeleteId}`);
-          await remove(chatRef);
-
-          const updated = chatList.filter((chat) => chat.id !== chatToDeleteId);
-          setChatList(updated);
-
-          if (chatId === chatToDeleteId) {
-            setChatId("");
-            setMessages([]);
-          }
-
-          setDeleteDialogOpen(false);
-          setChatToDeleteId(null);
-        }}
-        className="inline-flex items-center justify-center px-5 py-2 bg-red-600 text-white border border-red-500 rounded-full font-semibold transition hover:bg-red-700"
-      >
-        Yes, Delete
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
-    </div>
-
-    
-
   );
 }
 
