@@ -264,7 +264,7 @@ function Chat() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 h-screen text-white">
       {/* Desktop Sidebar (visible ≥ md) */}
-      <div className="hidden md:flex md:flex-col bg-zinc-800 border-r border-zinc-700 h-screen w-64 p-4">
+      <div className="hidden md:flex md:flex-col bg-zinc-800 border-r border-zinc-700 h-screen p-4">
         <h2 className="text-lg font-bold mb-4 text-white">Cognivox</h2>
 
         <div className="flex-1 space-y-3 overflow-y-auto text-left pr-1">
