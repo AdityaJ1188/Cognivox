@@ -50,7 +50,6 @@ function Chat() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-
   function handleLogout() {
     setError("");
     try {
@@ -264,28 +263,135 @@ function Chat() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 h-screen text-white">
+      {/* Desktop Sidebar (visible ≥ md) */}
+      <div className="hidden md:flex md:flex-col bg-zinc-800 border-r border-zinc-700 h-screen w-64 p-4">
+        <h2 className="text-lg font-bold mb-4 text-white">Cognivox</h2>
 
-       {/* Desktop Sidebar (visible ≥ md) */}
-<div className="hidden md:flex md:flex-col bg-zinc-800 border-r border-zinc-700 p-4">
-  <h2 className="text-lg font-bold mb-4 text-white">Cognivox</h2>
+        <div className="flex-1 space-y-3 overflow-y-auto text-left pr-1">
+          {chatList.map((chat) => (
+            <div
+              key={chat.id}
+              className={`bg-zinc-700 rounded-lg p-2 cursor-pointer hover:bg-zinc-600 ${
+                chat.id === chatId ? "bg-zinc-600" : ""
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <div
+                  onClick={() => handleChatClick(chat.id)}
+                  className="truncate w-full cursor-pointer text-white"
+                >
+                  {chat.title}
+                </div>
+                <div className="flex space-x-2 ml-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRenameChatId(chat.id);
+                      setRenameTitle(chat.title);
+                      setRenameDialogOpen(true);
+                    }}
+                    className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
+                  >
+                    {/* ✏️ Rename Icon */}
+                    <svg
+                      width="17"
+                      height="17"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C18.9113 1.47862 21.0686 2.47256 21.2799 4.09382C21.4912 5.71508 19.8362 6.61172 19.8362 6.61172L21.2799 6.40005Z" />
+                      <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" />
+                    </svg>
+                  </button>
 
-  <div className="flex-1 space-y-3 overflow-auto text-left">
-    {chatList.map((chat) => (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChatToDeleteId(chat.id);
+                      setDeleteDialogOpen(true);
+                    }}
+                    className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
+                  >
+                    {/* 🗑️ Delete Icon */}
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M10 11V17" />
+                      <path d="M14 11V17" />
+                      <path d="M4 7H20" />
+                      <path d="M6 7H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V7Z" />
+                      <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={createNewChat}
+          className="mt-4 bg-white text-black py-2 rounded-full font-semibold hover:bg-gray-200 transition"
+        >
+          + New Chat
+        </button>
+      </div>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar (drawer, visible < md) */}
       <div
-        key={chat.id}
-        className={`bg-zinc-700 rounded-lg p-2 cursor-pointer hover:bg-zinc-600 ${
-          chat.id === chatId ? "bg-zinc-600" : ""
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-800 border-r border-zinc-700 h-screen p-4 flex flex-col transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:hidden`}
       >
-        <div className="flex justify-between items-center">
-          <div
-            onClick={() => handleChatClick(chat.id)}
-            className="truncate w-full cursor-pointer text-white"
+        {/* Close Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="text-white hover:text-gray-300 text-xl"
           >
-            {chat.title}
-          </div>
-          <div className="flex space-x-2 ml-2">
-            <button
+            ×
+          </button>
+        </div>
+
+        <h2 className="text-lg font-bold mb-4 text-white">Cognivox</h2>
+
+        <div className="space-y-3 overflow-y-auto">
+          {chatList.map((chat) => (
+            <div
+              key={chat.id}
+              className={`bg-zinc-700 rounded-lg p-2 cursor-pointer hover:bg-zinc-600 ${
+                chat.id === chatId ? "bg-zinc-600" : ""
+              }`}
+              onClick={() => {
+                handleChatClick(chat.id);
+                setSidebarOpen(false); // Close drawer after selecting chat
+              }}
+            >
+              <div className="flex justify-between items-center text-white">
+                <div className="truncate w-full">{chat.title}</div>
+                <div className="flex space-x-2 ml-2">
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setRenameChatId(chat.id);
@@ -340,168 +446,58 @@ function Chat() {
                       <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
                     </svg>
                   </button>
-          </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <button
+          onClick={createNewChat}
+          className="mt-4 bg-white text-black py-2 rounded-full font-semibold hover:bg-gray-200 transition w-full"
+        >
+          + New Chat
+        </button>
       </div>
-    ))}
-  </div>
-
-  <button
-    onClick={createNewChat}
-    className="mt-4 bg-white text-black py-2 rounded-full font-semibold hover:bg-gray-200 transition"
-  >
-    + New Chat
-  </button>
-</div>
-{sidebarOpen && (
-  <div
-    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-    onClick={() => setSidebarOpen(false)}
-  />
-)}
-
-{/* Mobile Sidebar (drawer, visible < md) */}
-<div
-  className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-800 border-r border-zinc-700 p-4 transform transition-transform duration-300 ease-in-out ${
-    sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } md:hidden`}
->
-  {/* Close Button */}
-  <div className="flex justify-end mb-4">
-    <button
-      onClick={() => setSidebarOpen(false)}
-      className="text-white hover:text-gray-300 text-xl"
-    >
-      ×
-    </button>
-  </div>
-
-  <h2 className="text-lg font-bold mb-4 text-white">Cognivox</h2>
-
-  <div className="space-y-3 overflow-y-auto">
-    {chatList.map((chat) => (
-      <div
-        key={chat.id}
-        className={`bg-zinc-700 rounded-lg p-2 cursor-pointer hover:bg-zinc-600 ${
-          chat.id === chatId ? "bg-zinc-600" : ""
-        }`}
-        onClick={() => {
-          handleChatClick(chat.id);
-          setSidebarOpen(false); // Close drawer after selecting chat
-        }}
-      >
-        <div className="flex justify-between items-center text-white">
-          <div className="truncate w-full">{chat.title}</div>
-          <div className="flex space-x-2 ml-2">
-           <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setRenameChatId(chat.id);
-                      setRenameTitle(chat.title);
-                      setRenameDialogOpen(true);
-                    }}
-                    className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
-                  >
-                    {/* ✏️ Rename Icon */}
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M21.2799 6.40005L11.7399 15.94C10.7899 16.89 7.96987 17.33 7.33987 16.7C6.70987 16.07 7.13987 13.25 8.08987 12.3L17.6399 2.75002C18.9113 1.47862 21.0686 2.47256 21.2799 4.09382C21.4912 5.71508 19.8362 6.61172 19.8362 6.61172L21.2799 6.40005Z" />
-                      <path d="M11 4H6C4.93913 4 3.92178 4.42142 3.17163 5.17157C2.42149 5.92172 2 6.93913 2 8V18C2 19.0609 2.42149 20.0783 3.17163 20.8284C3.92178 21.5786 4.93913 22 6 22H17C19.21 22 20 20.2 20 18V13" />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setChatToDeleteId(chat.id);
-                      setDeleteDialogOpen(true);
-                    }}
-                    className="p-1 hover:bg-zinc-600 rounded cursor-pointer"
-                  >
-                    {/* 🗑️ Delete Icon */}
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M10 11V17" />
-                      <path d="M14 11V17" />
-                      <path d="M4 7H20" />
-                      <path d="M6 7H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V7Z" />
-                      <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
-                    </svg>
-                  </button>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  <button
-    onClick={createNewChat}
-    className="mt-4 bg-white text-black py-2 rounded-full font-semibold hover:bg-gray-200 transition w-full"
-  >
-    + New Chat
-  </button>
-</div>
-
 
       <div className="col-span-1 md:col-span-4 flex flex-col h-screen bg-zinc-900">
+        <div className="px-4 md:px-10 py-4 md:py-6 flex justify-between items-center border-b border-zinc-700">
+          {/* Hamburger - Only visible below 850px (md) */}
+          <button
+            className="md:hidden text-white focus:outline-none"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
 
-       <div className="px-4 md:px-10 py-4 md:py-6 flex justify-between items-center border-b border-zinc-700">
-  {/* Hamburger - Only visible below 850px (md) */}
-  <button
-    className="md:hidden text-white focus:outline-none"
-    onClick={() => setSidebarOpen(true)}
-  >
-    <svg
-      className="w-6 h-6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 6h16M4 12h16M4 18h16"
-      />
-    </svg>
-  </button>
+          <span className="text-xl font-semibold">Cognivox</span>
 
-  <span className="text-xl font-semibold">Cognivox</span>
-
-  <div className="flex items-center space-x-2 md:space-x-4">
-    <span className="text-sm truncate max-w-[200px] hidden md:inline">
-      {currentUser.email}
-    </span>
-    <button
-      onClick={handleLogout}
-      className="px-3 md:px-4 py-1.5 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 hover:shadow transition"
-    >
-      Logout
-    </button>
-  </div>
-</div>
-
+          <div className="flex items-center space-x-2 md:space-x-4">
+            <span className="text-sm truncate max-w-[200px] hidden md:inline">
+              {currentUser.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="px-3 md:px-4 py-1.5 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 hover:shadow transition"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
 
         <div className="relative flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto px-10 py-6 pb-28 space-y-4">

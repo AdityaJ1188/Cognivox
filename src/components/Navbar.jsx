@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const menuRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,8 +14,25 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  
-  
+  // Close mobile menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
+
   const signupcomp = () => navigate("/signup");
   const logincomp = () => navigate("/login");
 
@@ -50,7 +68,10 @@ export default function Navbar() {
           />
 
           {menuOpen && (
-            <div className="absolute top-20 right-6 bg-zinc-900 p-4 rounded-md shadow-md flex flex-col space-y-3 z-50">
+            <div
+              ref={menuRef}
+              className="absolute top-20 right-6 bg-zinc-900 p-4 rounded-md shadow-md flex flex-col space-y-3 z-50"
+            >
               <a href="/" className="text-white hover:text-gray-300">Home</a>
               <a href="#About" className="text-white hover:text-gray-300">About</a>
               <a href="#Projects" className="text-white hover:text-gray-300">Contact Us</a>
