@@ -48,7 +48,7 @@ export default function Navbar() {
           <ul className="hidden md:flex gap-12 text-white">
             <a href="/" className="cursor-pointer hover:text-gray-400">Home</a>
             <a href="about" className="cursor-pointer hover:text-gray-400">About</a>
-            <a href="#Projects" className="cursor-pointer hover:text-gray-400">Contact Us</a>
+            <a href="contact" className="cursor-pointer hover:text-gray-400">Contact Us</a>
           </ul>
 
           <div className="hidden md:flex gap-2">
@@ -74,7 +74,7 @@ export default function Navbar() {
             >
               <a href="/" className="text-white hover:text-gray-300">Home</a>
               <a href="about" className="text-white hover:text-gray-300">About</a>
-              <a href="#Projects" className="text-white hover:text-gray-300">Contact Us</a>
+              <a href="contact" className="text-white hover:text-gray-300">Contact Us</a>
               <button onClick={logincomp} className="mt-2 px-6 py-2 border border-white text-white bg-transparent rounded-full hover:bg-white hover:text-black transition">Log in</button>
               <button onClick={signupcomp} className="px-6 py-2 bg-white text-black rounded-full">Sign up</button>
             </div>

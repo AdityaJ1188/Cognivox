@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import Resetpassword from "./components/Resetpassword";
 import Aboutpage from "./components/Aboutpage";
+import Contactus from "./components/Contactus";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           }
         />
         <Route path="about" element={<Aboutpage/>} />
+        <Route path="/contact" element={<Contactus />} />
       </Route> 
     </Routes>
   );
