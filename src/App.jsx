@@ -7,6 +7,7 @@ import Login from "./components/Login";
 import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import Resetpassword from "./components/Resetpassword";
+import Aboutpage from "./components/Aboutpage";
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
             </PrivateRoute>
           }
         />
-      </Route>
+        <Route path="about" element={<Aboutpage/>} />
+      </Route> 
     </Routes>
   );
 }
