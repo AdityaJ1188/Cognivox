@@ -56,6 +56,7 @@ export default function Signup() {
                   type="text"
                   name="username"
                   ref={usernameRef}
+                  required
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
@@ -67,6 +68,7 @@ export default function Signup() {
                   type="email"
                   name="email"
                   ref={emailRef}
+                  required
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
@@ -78,6 +80,7 @@ export default function Signup() {
                   type="password"
                   name="password"
                   ref={passwordRef}
+                  required
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
@@ -91,6 +94,7 @@ export default function Signup() {
                   type="password"
                   name="Cpassword"
                   ref={passwordconfirmRef}
+                  required
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
