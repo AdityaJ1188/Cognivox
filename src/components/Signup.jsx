@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const usernameRef = useRef();
@@ -17,7 +17,7 @@ export default function Signup() {
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault(); 
+    e.preventDefault();
 
     if (passwordRef.current.value !== passwordconfirmRef.current.value) {
       toast.error("Passwords do not match ❌");
@@ -45,8 +45,8 @@ export default function Signup() {
             <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
               Sign up to create account
             </h2>
-            
-            <p className="mt-2 text-base">Already have an account? Sign In</p>
+
+            <p className="mt-2 text-base">Already have an account? <Link to="/login" className="underline">Log in</Link> </p>
 
             <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
               <div>
@@ -81,6 +81,9 @@ export default function Signup() {
                   name="password"
                   ref={passwordRef}
                   required
+                  minlength="8"
+                  pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$"
+                  title="Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a number."
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>

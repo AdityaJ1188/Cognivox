@@ -61,6 +61,9 @@ export default function Login() {
                   name="password"
                   ref={passwordRef}
                   required
+                  minlength="8"
+                  pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$"
+                  title="Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a number."
                   className="mt-2 flex h-10 w-full rounded-md border border-zinc-700 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400"
                 />
               </div>
