@@ -46,9 +46,9 @@ export default function Navbar() {
       {!isMobile && (
         <>
           <ul className="hidden md:flex gap-12 text-white">
-            <a href="/" className="cursor-pointer hover:text-gray-400">Home</a>
-            <a href="about" className="cursor-pointer hover:text-gray-400">About</a>
-            <a href="contact" className="cursor-pointer hover:text-gray-400">Contact Us</a>
+           <Link to="/" className="text-white hover:text-gray-300">Home</Link>
+              <Link to="/about" className="text-white hover:text-gray-300">About</Link>
+              <Link to="/contact" className="text-white hover:text-gray-300">Contact Us</Link>
           </ul>
 
           <div className="hidden md:flex gap-2">
