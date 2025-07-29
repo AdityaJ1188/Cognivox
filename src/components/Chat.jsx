@@ -528,6 +528,7 @@ function Chat() {
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-3/4 bg-transparent">
             <div className="flex items-center bg-zinc-800/70 backdrop-blur-md rounded-full px-4 h-16 border border-zinc-700">
               <input
+              
                 type="text"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
